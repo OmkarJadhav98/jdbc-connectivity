@@ -1,86 +1,127 @@
 package com.project.repository;
 
 import com.project.model.Address;
-import com.project.service.ConnectionService;
-
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AddressRepository {
 
-    private static Connection connection = null;
+    private static final Logger logger = LoggerFactory.getLogger(AddressRepository.class);
+    private Connection connection = null;
 
     private void initConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = new ConnectionService().getConnection();
+            connection = JdbcConnection.getConnection();
         }
     }
 
     public List<Address> retrieveAddresses() {
-
         List<Address> addresses = new ArrayList<>();
+        String query = "SELECT * FROM address";
 
-        // Use the connection to execute SQL queries and interact with the database
-        try {
-            this.initConnection();
-            // Your database operations here...
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM address");
-            // Iterate over the result set
+        try (Connection conn = JdbcConnection.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
             while (resultSet.next()) {
-                int id = resultSet.getInt("address_id"); // Replace "id" with your actual column name
-                String city = resultSet.getString("city"); // Replace "city" with your actual column name
-                // Do something with the data, e.g., print it
-                Address address = new Address(id, city);
+                long id = resultSet.getLong("id");
+                String name = resultSet.getString("name");
+                long flatNo = resultSet.getLong("flatNo");
+                String buildingName = resultSet.getString("buildingName");
+                String street = resultSet.getString("street");
+                String city = resultSet.getString("city");
+                String state = resultSet.getString("state");
+                long pinCode = resultSet.getLong("pinCode");
+
+                Address address = new Address(id, name, flatNo, buildingName, street, city, state, pinCode);
                 addresses.add(address);
             }
         } catch (SQLException e) {
-            System.err.println("SQL error: " + e.getMessage());
-        } finally {
-            // Close the connection when done
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    System.err.println("Error closing connection: " + e.getMessage());
-                }
-            }
+            logger.error("SQL error: {}", e.getMessage(), e);
         }
         return addresses;
     }
 
-    public Address retrieveAddress(int addressId) {
-        Address address = null;
-        // Use the connection to execute SQL queries and interact with the database
-        try {
-            this.initConnection();
-            // Your database operations here...
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM address where address_id = " + addressId);
-            // Iterate over the result set
-            while (resultSet.next()) {
-                int id = resultSet.getInt("address_id"); // Replace "id" with your actual column name
-                String city = resultSet.getString("city"); // Replace "city" with your actual column name
-                // Do something with the data, e.g., print it
-                address = new Address(id, city);
-            }
+    public void createAddress(Address address) {
+        String query = "INSERT INTO address (id, name, flatNo, buildingName, street, city, state, pinCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = JdbcConnection.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+
+            preparedStatement.setLong(1, address.getId());
+            preparedStatement.setString(2, address.getName());
+            preparedStatement.setLong(3, address.getFlatNo());
+            preparedStatement.setString(4, address.getBuildingName());
+            preparedStatement.setString(5, address.getStreet());
+            preparedStatement.setString(6, address.getCity());
+            preparedStatement.setString(7, address.getState());
+            preparedStatement.setLong(8, address.getPinCode());
+            preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("SQL error: " + e.getMessage());
-        } finally {
-            // Close the connection when done
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    System.err.println("Error closing connection: " + e.getMessage());
+            logger.error("SQL error: {}", e.getMessage(), e);
+        }
+    }
+
+    public void updateAddress(Address address) {
+        String query = "UPDATE address SET id = ?, name = ?, flatNo = ?, buildingName = ?, street = ?, city = ?, state = ?, pinCode = ? WHERE id = ?";
+        try (Connection conn = JdbcConnection.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+
+            preparedStatement.setLong(1, address.getId());
+            preparedStatement.setString(2, address.getName());
+            preparedStatement.setLong(3, address.getFlatNo());
+            preparedStatement.setString(4, address.getBuildingName());
+            preparedStatement.setString(5, address.getStreet());
+            preparedStatement.setString(6, address.getCity());
+            preparedStatement.setString(7, address.getState());
+            preparedStatement.setLong(8, address.getPinCode());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("SQL error: {}", e.getMessage(), e);
+        }
+    }
+
+    public void deleteAddress(long id) {
+        String query = "DELETE FROM address WHERE id = ?";
+        try (Connection conn = JdbcConnection.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("SQL error: {}", e.getMessage(), e);
+        }
+    }
+
+    public Address findById(long addressId) {
+        String query = "SELECT * FROM address WHERE id = ?";
+        Address address = null;
+        try (Connection conn = JdbcConnection.getConnection();
+             PreparedStatement preparedStatement = conn.prepareStatement(query)) {
+
+            preparedStatement.setLong(1, addressId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    long id = resultSet.getLong("id");
+                    String name = resultSet.getString("name");
+                    long flatNo = resultSet.getLong("flatNo");
+                    String buildingName = resultSet.getString("buildingName");
+                    String street = resultSet.getString("street");
+                    String city = resultSet.getString("city");
+                    String state = resultSet.getString("state");
+                    long pinCode = resultSet.getLong("pinCode");
+
+                    address = new Address(id, name, flatNo, buildingName, street, city, state, pinCode);
                 }
             }
+        } catch (SQLException e) {
+            logger.error("SQL error: {}", e.getMessage(), e);
         }
         return address;
     }
-
 }
