@@ -1,30 +1,50 @@
 package com.project.model;
 
 public class Address {
-    private long id;
+    private long Id;
+    private String name;
+    private final long flatNo;
+
+    private final String buildingName;
     private String street;
     private String city;
+    private long pinCode;
     private String state;
-    private String country;
-    private long postalCode;
 
-    public Address(long id, String street, String city, String state, String country, long postalCode) {
-        this.id = id;
+
+    public Address(long id, String name, long flatNo, String buildingName, String street, String city, String state, long pinCode) {
+        this.Id = id;
+        this.name = name;
+        this.flatNo = flatNo;
+        this.buildingName = buildingName;
         this.street = street;
         this.city = city;
         this.state = state;
-        this.country = country;
-        this.postalCode = postalCode;
+        this.pinCode = pinCode;
     }
 
-    // Getters and Setters
-
     public long getId() {
-        return id;
+        return Id;
     }
 
     public void setId(long id) {
-        this.id = id;
+        Id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public long getFlatNo() {
+        return flatNo;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
     }
 
     public String getStreet() {
@@ -51,19 +71,11 @@ public class Address {
         this.state = state;
     }
 
-    public String getCountry() {
-        return country;
+    public long getPinCode() {
+        return pinCode;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public long getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(long postalCode) {
-        this.postalCode = postalCode;
+    public void setPinCode(long pinCode) {
+        this.pinCode = pinCode;
     }
 }
