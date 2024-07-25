@@ -1,68 +1,87 @@
-
 package com.project;
 
-import com.project.service.AddressService;
-import com.project.service.ConnectionService;
-import com.project.service.StudentService;
+import com.project.model.Customer;
+import com.project.model.DeliveryExecutive;
+import com.project.model.Kart;
+import com.project.model.Menu;
+import com.project.model.Restaurant;
+import com.project.repository.CustomerRepository;
+import com.project.repository.DeliveryExecutiveRepository;
+import com.project.repository.KartRepository;
+import com.project.repository.MenuRepository;
+import com.project.repository.RestaurantRepository;
+import com.project.service.CustomerService;
+import com.project.service.DeliveryExecutiveService;
+import com.project.service.KartService;
+import com.project.service.MenuService;
+import com.project.service.RestaurantService;
 
-import java.io.IOException;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
-public class App {
+public class MainApplication {
 
-    private static final ConnectionService connectionService = new ConnectionService();
+    public static void main(String[] args) {
+        // Initialize Repositories
+        CustomerRepository customerRepository = new CustomerRepository();
+        DeliveryExecutiveRepository deliveryExecutiveRepository = new DeliveryExecutiveRepository();
+        KartRepository kartRepository = new KartRepository();
+        MenuRepository menuRepository = new MenuRepository();
+        RestaurantRepository restaurantRepository = new RestaurantRepository();
 
-    public static void main(String[] args) throws IOException {
-        StudentService studentService = new StudentService();
-        AddressService addressService = new AddressService();
-        Scanner scanner = new Scanner(System.in);
-        int choice = 0;
-        do {
-            //Runtime.getRuntime().exec("reset");
-            System.out.println("*** STUDENT MANAGEMENT SYSTEM ***");
-            System.out.println("_______________________________");
-            System.out.println("Select operation:");
-            System.out.println("1. Create Employee");
-            System.out.println("2. Retrieve Employee");
-            System.out.println("3. Update Employee");
-            System.out.println("4. Delete Employee");
-            System.out.println("5. Retrieve Address");
-            System.out.println("0. Exit");
+        // Initialize Services
+        CustomerService customerService = new CustomerService(customerRepository);
+        DeliveryExecutiveService deliveryExecutiveService = new DeliveryExecutiveService(deliveryExecutiveRepository);
+        KartService kartService = new KartService(kartRepository);
+        MenuService menuService = new MenuService(menuRepository);
+        RestaurantService restaurantService = new RestaurantService(restaurantRepository);
 
-            System.out.print("Enter your choice: ");
-            choice = Integer.parseInt(scanner.nextLine());
+        // Example Usage
 
-            switch (choice) {
-                case 1:
-                    System.out.println("Performing CREATE operation on Student");
-                    studentService.insertStudent();
-                    break;
-                case 2:
-                    System.out.println("Performing READ operation on Employee");
-                    // Add your read logic here
-                    break;
-                case 3:
-                    System.out.println("Performing UPDATE operation on Employee");
-                    // Add your update logic here
-                    break;
-                case 4:
-                    System.out.println("Performing DELETE operation on Employee");
-                    // Add your delete logic here
-                    break;
-                case 5:
-                    System.out.println("Performing RETRIEVE operation on Address..");
+        // Create a new Customer
+        Customer customer = new Customer(0, "John Doe", "john.doe@example.com", null); // Replace with actual Contact object
+        customerService.addCustomer(customer);
 
-                    addressService.retrieveAddresses().forEach(address -> {
-                        System.out.println("Address ID: " + address.getAddressId() + ", City: " + address.getCity());
-                    });
-                    break;
-                case 0:
-                    System.out.println("Exiting program");
-                    break;
-                default:
-                    System.out.println("Invalid choice");
-            }
-        } while (choice != 0);
-        scanner.close();
+        // Create a new Delivery Executive
+        DeliveryExecutive deliveryExecutive = new DeliveryExecutive(0, "Jane Smith", "555-1234", true);
+        deliveryExecutiveService.addDeliveryExecutive(deliveryExecutive);
+
+        // Create a new Restaurant
+        Restaurant restaurant = new Restaurant(0, "Pizza Place", "123 Pizza Lane", "555-5678");
+        restaurantService.addRestaurant(restaurant);
+
+        // Create a new Menu
+        Menu menu = new Menu(0, "Pepperoni Pizza", "Delicious pepperoni pizza", 12.99, restaurant, "Pizza", true);
+        menuService.addMenu(menu);
+
+        // Create a new Kart
+        List<Menu> menus = new ArrayList<>();
+        menus.add(menu);
+        Kart kart = new Kart(0, menus, 12.99, customer, restaurant);
+        kartService.addKart(kart);
+
+        // Retrieve and display all customers
+        List<Customer> customers = customerService.getAllCustomers();
+        System.out.println("Customers:");
+        for (Customer cust : customers) {
+            System.out.println(cust.getName() + " (" + cust.getEmail() + ")");
+        }
+
+        // Retrieve and display all delivery executives
+        List<DeliveryExecutive> deliveryExecutives = deliveryExecutiveService.getAllDeliveryExecutives();
+        System.out.println("Delivery Executives:");
+        for (DeliveryExecutive de : deliveryExecutives) {
+            System.out.println(de.getName() + " (" + de.getPhoneNumber() + ")");
+        }
+
+        // Retrieve and display all karts
+        List<Kart> karts = kartService.getAllKarts();
+        System.out.println("Karts:");
+        for (Kart kartItem : karts) {
+            System.out.println("Kart ID: " + kartItem.getId() + ", Final Price: " + kartItem.getFinalPrice());
+        }
+
+        // Cleanup (Optional)
+        // Remove a customer, delivery executive, or kart as needed
     }
 }
