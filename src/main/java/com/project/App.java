@@ -1,25 +1,13 @@
 package com.project;
 
-import com.project.model.Customer;
-import com.project.model.DeliveryExecutive;
-import com.project.model.Kart;
-import com.project.model.Menu;
-import com.project.model.Restaurant;
-import com.project.repository.CustomerRepository;
-import com.project.repository.DeliveryExecutiveRepository;
-import com.project.repository.KartRepository;
-import com.project.repository.MenuRepository;
-import com.project.repository.RestaurantRepository;
-import com.project.service.CustomerService;
-import com.project.service.DeliveryExecutiveService;
-import com.project.service.KartService;
-import com.project.service.MenuService;
-import com.project.service.RestaurantService;
+import com.project.model.*;
+import com.project.repository.*;
+import com.project.service.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainApplication {
+public class App {
 
     public static void main(String[] args) {
         // Initialize Repositories
@@ -36,42 +24,61 @@ public class MainApplication {
         MenuService menuService = new MenuService(menuRepository);
         RestaurantService restaurantService = new RestaurantService(restaurantRepository);
 
-        // Example Usage
+        // Create sample data
 
-        // Create a new Customer
-        Customer customer = new Customer(0, "John Doe", "john.doe@example.com", null); // Replace with actual Contact object
+        // Create Address and Contact for Customer
+        Address customerAddress = new Address(1, "John Doe", "123 Main St", "Building 5", "India");
+        Contact customerContact = new Contact(1, customerAddress, "john.doe@example.com", "555-1234");
+        Customer customer = new Customer(1, "johndoe", "password", customerContact);
+
+        // Add customer to the repository
         customerService.addCustomer(customer);
 
-        // Create a new Delivery Executive
-        DeliveryExecutive deliveryExecutive = new DeliveryExecutive(0, "Jane Smith", "555-1234", true);
-        deliveryExecutiveService.addDeliveryExecutive(deliveryExecutive);
+        // Create Address and Contact for Restaurant
+        Address restaurantAddress = new Address(2, "Pizza Place", "456 Food St", "Suite 7", "Cityville");
+        Contact restaurantContact = new Contact(2, restaurantAddress, "contact@pizzaplace.com", "555-5678");
+        Restaurant restaurant = new Restaurant(1, "Pizza Place", restaurantContact, new ArrayList<>());
 
-        // Create a new Restaurant
-        Restaurant restaurant = new Restaurant(0, "Pizza Place", "123 Pizza Lane", "555-5678");
+        // Add restaurant to the repository
         restaurantService.addRestaurant(restaurant);
 
-        // Create a new Menu
-        Menu menu = new Menu(0, "Pepperoni Pizza", "Delicious pepperoni pizza", 12.99, restaurant, "Pizza", true);
-        menuService.addMenu(menu);
+        // Create Menu items
+        Menu menu1 = new Menu(1, "Pepperoni Pizza", "Delicious pepperoni pizza", 12.99, restaurant, "InStock");
 
-        // Create a new Kart
-        List<Menu> menus = new ArrayList<>();
-        menus.add(menu);
-        Kart kart = new Kart(0, menus, 12.99, customer, restaurant);
+        // Add menu to the repository
+        menuService.addMenu(menu1);
+
+        // Add menu to restaurant's menu list
+        List<Menu> menuItems = new ArrayList<>();
+        menuItems.add(menu1);
+        restaurant.setMenuItems(menuItems);
+
+        // Create Kart with selected menus
+        List<Menu> selectedMenus = new ArrayList<>();
+        selectedMenus.add(menu1);
+        Kart kart = new Kart(1, selectedMenus, 12.99, customer, restaurant);
+
+        // Add kart to the repository
         kartService.addKart(kart);
+
+        // Create Delivery Executive
+        DeliveryExecutive deliveryExecutive = new DeliveryExecutive(1, "Jane Smith", "Bike", true);
+
+        // Add delivery executive to the repository
+        deliveryExecutiveService.addDeliveryExecutive(deliveryExecutive);
 
         // Retrieve and display all customers
         List<Customer> customers = customerService.getAllCustomers();
         System.out.println("Customers:");
         for (Customer cust : customers) {
-            System.out.println(cust.getName() + " (" + cust.getEmail() + ")");
+            System.out.println(cust.getUsername() + " (" + cust.getContact().getEmailId() + ")");
         }
 
         // Retrieve and display all delivery executives
         List<DeliveryExecutive> deliveryExecutives = deliveryExecutiveService.getAllDeliveryExecutives();
         System.out.println("Delivery Executives:");
         for (DeliveryExecutive de : deliveryExecutives) {
-            System.out.println(de.getName() + " (" + de.getPhoneNumber() + ")");
+            System.out.println(de.getName() + " (" + de.getVehicleInfo() + ")");
         }
 
         // Retrieve and display all karts
