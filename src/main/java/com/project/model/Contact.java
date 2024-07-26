@@ -1,11 +1,11 @@
 package com.project.model;
 
 public class Contact {
-    private int id;
-    private String phone;
+    private long id;
+    private long phone;
     private Address address;
 
-    public Contact(int id, String phone, Address address) {
+    public Contact(long id, long phone, Address address) {
         this.id = id;
         this.phone = phone;
         this.address = address;
@@ -13,19 +13,19 @@ public class Contact {
 
     // Getters and setters
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public String getPhone() {
+    public long getPhone() {
         return phone;
     }
 
-    public void setPhone(String phone) {
+    public void setPhone(long phone) {
         this.phone = phone;
     }
 
