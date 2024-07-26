@@ -2,28 +2,31 @@ package com.project.repository;
 
 import com.project.model.Customer;
 import com.project.model.Contact;
+import com.project.service.ConnectionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CustomerRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomerRepository.class);
     private Connection connection;
-    private final ContactRepository contactRepository;
+    private ContactRepository contactRepository;
 
-    public CustomerRepository(ContactRepository contactRepository) {
+    public CustomerRepository() {
         this.contactRepository = contactRepository;
     }
 
+
     private void initConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = JdbcConnection.getConnection();
+            connection = ConnectionService.getConnection();
         }
     }
 
@@ -43,7 +46,7 @@ public class CustomerRepository {
                 int contactId = resultSet.getInt("contact_id");
 
                 // Fetch the contact for this customer
-                Contact contact = contactRepository.findById(contactId);
+                Contact contact = contactRepository.getContactById(contactId);
 
                 Customer customer = new Customer(id, name, email, contact);
                 customers.add(customer);
@@ -103,13 +106,13 @@ public class CustomerRepository {
         }
     }
 
-    public Customer findById(int customerId) {
+    public Customer findById(long customerId) {
         String query = "SELECT * FROM customer WHERE id = ?";
         Customer customer = null;
         try {
             this.initConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, customerId);
+            preparedStatement.setLong(1, customerId);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
@@ -119,7 +122,7 @@ public class CustomerRepository {
                 int contactId = resultSet.getInt("contact_id");
 
                 // Fetch the contact for this customer
-                Contact contact = contactRepository.findById(contactId);
+                Contact contact = contactRepository.getContactById(contactId);
 
                 customer = new Customer(id, name, email, contact);
             }
