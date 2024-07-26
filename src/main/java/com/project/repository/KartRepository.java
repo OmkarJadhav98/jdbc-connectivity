@@ -1,17 +1,18 @@
 package com.project.repository;
 
 import com.project.model.Kart;
-import com.project.model.Menu;
 import com.project.model.Customer;
 import com.project.model.Restaurant;
+import com.project.service.ConnectionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class KartRepository {
 
@@ -20,7 +21,7 @@ public class KartRepository {
 
     private void initConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = JdbcConnection.getConnection();
+            connection = ConnectionService.getConnection();
         }
     }
 
@@ -40,14 +41,10 @@ public class KartRepository {
                 long restaurantId = resultSet.getLong("restaurant_id");
 
                 // Fetch Customer and Restaurant
-                ContactRepository contactRepository = new ContactRepository(); // Ensure ContactRepository is properly initialized
-                Customer customer = new CustomerRepository(contactRepository).findById(customerId);
+                Customer customer = new CustomerRepository().findById(customerId);
                 Restaurant restaurant = new RestaurantRepository().findById(restaurantId);
 
-                // Assuming you have a way to fetch the selected menus, e.g., a method in MenuRepository
-                List<Menu> selectedMenus = new MenuRepository().findByKartId(id); // Populate this list
-
-                Kart kart = new Kart(id, selectedMenus, finalPrice, customer, restaurant);
+                Kart kart = new Kart(id, finalPrice, customer, restaurant);
                 karts.add(kart);
             }
         } catch (SQLException e) {
@@ -103,6 +100,34 @@ public class KartRepository {
         } finally {
             closeConnection();
         }
+    }
+
+    public Kart findById(long id) {
+        String query = "SELECT * FROM kart WHERE id = ?";
+        Kart kart = null;
+        try {
+            this.initConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                double finalPrice = resultSet.getDouble("final_price");
+                int customerId = resultSet.getInt("customer_id");
+                long restaurantId = resultSet.getLong("restaurant_id");
+
+                // Fetch Customer and Restaurant
+                Customer customer = new CustomerRepository().findById(customerId);
+                Restaurant restaurant = new RestaurantRepository().findById(restaurantId);
+
+                kart = new Kart(id, finalPrice, customer, restaurant);
+            }
+        } catch (SQLException e) {
+            logger.error("SQL error: {}", e.getMessage(), e);
+        } finally {
+            closeConnection();
+        }
+        return kart;
     }
 
     private void closeConnection() {
