@@ -4,53 +4,104 @@ import com.project.model.Address;
 import com.project.repository.AddressRepository;
 
 import java.util.List;
+import java.util.Scanner;
 
 public class AddressService {
-    private final AddressRepository addressRepository = new AddressRepository();
+    private final AddressRepository addressRepository;
+    private final Scanner scanner;
 
-    /**
-     * Retrieve a list of addresses.
-     *
-     * @return A list of Address objects.
-     */
+    public AddressService(AddressRepository addressRepository) {
+        this.addressRepository = addressRepository;
+        this.scanner = new Scanner(System.in);
+    }
+
     public List<Address> retrieveAddresses() {
         return addressRepository.retrieveAddresses();
     }
 
-    /**
-     * Add a new address.
-     *
-     * @param address The Address object to be added.
-     */
-    public void createAddress(Address address) {
+    public void createAddress() {
+        System.out.println("Enter Address ID:");
+        long id = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+
+        System.out.println("Enter name:");
+        String name = scanner.nextLine();
+
+        System.out.println("Enter flatNo:");
+        long flatNo = scanner.nextLong();
+
+        System.out.println("Enter buildingName:");
+        String buildingName = scanner.nextLine();
+
+        System.out.println("Enter street:");
+        String street = scanner.nextLine();
+
+        System.out.println("Enter city:");
+        String city = scanner.nextLine();
+
+        System.out.println("Enter state:");
+        String state = scanner.nextLine();
+
+        System.out.println("Enter Pin Code:");
+        long pinCode = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+
+        Address address = new Address(id, name, flatNo, buildingName, street, city, state, pinCode);
         addressRepository.createAddress(address);
+        System.out.println("Address created successfully.");
     }
 
-    /**
-     * Update an existing address.
-     *
-     * @param address The Address object with updated information.
-     */
-    public void updateAddress(Address address) {
+    public void updateAddress() {
+        System.out.println("Enter Address ID to Update:");
+        long id = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+
+        System.out.println("Enter New name:");
+        String name = scanner.nextLine();
+
+        System.out.println("Enter New flatNo:");
+        long flatNo = scanner.nextLong();
+
+        System.out.println("Enter New buildingName:");
+        String buildingName = scanner.nextLine();
+
+        System.out.println("Enter New street:");
+        String street = scanner.nextLine();
+
+        System.out.println("Enter New city:");
+        String city = scanner.nextLine();
+
+        System.out.println("Enter New state:");
+        String state = scanner.nextLine();
+
+        System.out.println("Enter New Pin Code:");
+        long pinCode = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+
+        Address address = new Address(id, name, flatNo, buildingName, street, city, state, pinCode);
         addressRepository.updateAddress(address);
+        System.out.println("Address updated successfully.");
     }
 
-    /**
-     * Delete an address by ID.
-     *
-     * @param id The ID of the address to be deleted.
-     */
-    public void deleteAddress(long id) {
+    public void deleteAddress() {
+        System.out.println("Enter Address ID to delete:");
+        long id = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+
         addressRepository.deleteAddress(id);
+        System.out.println("Address deleted successfully.");
     }
 
-    /**
-     * Find an address by ID.
-     *
-     * @param id The ID of the address to find.
-     * @return The Address object if found, otherwise null.
-     */
-    public Address findById(long id) {
-        return addressRepository.findById(id);
+    public void findAddressById() {
+        System.out.println("Enter Address ID to find:");
+        long id = scanner.nextLong();
+        scanner.nextLine(); // Consume newline
+
+        Address address = addressRepository.findById(id);
+        if (address != null) {
+            System.out.println("Address found: " + address);
+        } else {
+            System.out.println("Address not found.");
+        }
     }
 }
