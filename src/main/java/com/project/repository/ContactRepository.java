@@ -2,6 +2,7 @@ package com.project.repository;
 
 import com.project.model.Contact;
 import com.project.model.Address;
+import com.project.service.ConnectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,13 +10,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContactRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(ContactRepository.class);
 
     private Connection getConnection() throws SQLException {
-        return JdbcConnection.getConnection(); // Ensure JdbcConnection provides a valid connection
+        return ConnectionService.getConnection();
     }
 
     public Contact getContactById(int id) {
@@ -27,7 +30,7 @@ public class ContactRepository {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     int contactId = rs.getInt("id");
-                    String phone = rs.getString("phone");
+                    long phone = rs.getLong("phone");
 
                     // Retrieve Address fields from the database
                     long flatNo = rs.getLong("flatNo");
@@ -54,8 +57,8 @@ public class ContactRepository {
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setInt(1, contact.getId());
-            pstmt.setString(2, contact.getPhone());
+            pstmt.setLong(1, contact.getId());
+            pstmt.setLong(2, contact.getPhone());
             pstmt.setLong(3, contact.getAddress().getFlatNo());
             pstmt.setString(4, contact.getAddress().getBuildingName());
             pstmt.setString(5, contact.getAddress().getStreet());
@@ -73,14 +76,14 @@ public class ContactRepository {
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setString(1, contact.getPhone());
+            pstmt.setLong(1, contact.getPhone());
             pstmt.setLong(2, contact.getAddress().getFlatNo());
             pstmt.setString(3, contact.getAddress().getBuildingName());
             pstmt.setString(4, contact.getAddress().getStreet());
             pstmt.setString(5, contact.getAddress().getCity());
             pstmt.setString(6, contact.getAddress().getState());
             pstmt.setLong(7, contact.getAddress().getPinCode());
-            pstmt.setInt(8, contact.getId());
+            pstmt.setLong(8, contact.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error updating contact with ID {}: {}", contact.getId(), e.getMessage(), e);
@@ -99,16 +102,16 @@ public class ContactRepository {
         }
     }
 
-    public Contact findById(int contactId) {
+    public Contact findById(long contactId) {
         String query = "SELECT * FROM contacts WHERE id = ?";
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setInt(1, contactId);
+            pstmt.setLong(1, contactId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     int id = rs.getInt("id");
-                    String phone = rs.getString("phone");
+                    long phone = rs.getLong("phone");
 
                     // Retrieve Address fields from the database
                     long flatNo = rs.getLong("flatNo");
@@ -129,4 +132,37 @@ public class ContactRepository {
         }
         return null;
     }
+
+    public List<Contact> retrieveContacts() {
+        String query = "SELECT * FROM contacts";
+        List<Contact> contacts = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                long id = rs.getLong("id");
+                long phone = rs.getLong("phone");
+
+                // Retrieve Address fields from the database
+                long flatNo = rs.getLong("flatNo");
+                String buildingName = rs.getString("buildingName");
+                String street = rs.getString("street");
+                String city = rs.getString("city");
+                String state = rs.getString("state");
+                long pinCode = rs.getLong("pinCode");
+
+                // Create Address instance
+                Address address = new Address(id, "", flatNo, buildingName, street, city, state, pinCode);
+
+                // Create Contact instance and add to list
+                Contact contact = new Contact(id, phone, address);
+                contacts.add(contact);
+            }
+        } catch (SQLException e) {
+            logger.error("Error retrieving contacts: {}", e.getMessage(), e);
+        }
+        return contacts;
+    }
+
 }
