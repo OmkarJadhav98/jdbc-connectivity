@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.project.service.ConnectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +19,7 @@ public class DeliveryExecutiveRepository {
 
     private void initConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = JdbcConnection.getConnection();
+            connection = ConnectionService.getConnection();
         }
     }
 
