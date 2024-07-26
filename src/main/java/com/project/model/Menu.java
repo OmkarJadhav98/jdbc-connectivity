@@ -1,27 +1,20 @@
 package com.project.model;
 
-import javax.swing.text.html.parser.Entity;
-
 public class Menu {
     private long id;
     private String name;
-    private String description;
+    private final String description;
     private double price;
     private Restaurant restaurant;
-    private String cuisine;
-    private boolean isVegetarian;
+    private boolean availability; // Should be a boolean field
 
-    public Menu(long id, String name, String description, double price, Restaurant restaurant, String cuisine) {
+    public Menu(long id, String name, String description, double price, Restaurant restaurant, boolean availability) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.restaurant = restaurant;
-        this.cuisine = cuisine;
-        this.isVegetarian = isVegetarian;
-    }
-
-    public Menu(int id, String pepperoniPizza, String deliciousPepperoniPizza, double price, Entity restaurantEntity, String inStock) {
+        this.availability = availability;
     }
 
     // Getters and Setters
@@ -30,20 +23,10 @@ public class Menu {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
     public Restaurant getRestaurant() { return restaurant; }
     public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
-    public String getCuisine() { return cuisine; }
-    public void setCuisine(String cuisine) { this.cuisine = cuisine; }
-    public boolean isVegetarian() { return isVegetarian; }
-    public void setVegetarian(boolean isVegetarian) { this.isVegetarian = isVegetarian; }
-
-    public String getState() {
-        return getState();}
-
-    public boolean isAvailability() {
-        return isAvailability();
-    }
+    public boolean isAvailable() { return availability; } // Fixed getter name
+    public void setAvailability(boolean availability) { this.availability = availability; } // Fixed setter
 }
