@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.project.service.ConnectionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +23,7 @@ public class OrderRepository {
 
     private void initConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
-            connection = JdbcConnection.getConnection();
+            connection = ConnectionService.getConnection();
         }
     }
 
@@ -36,7 +38,7 @@ public class OrderRepository {
 
             while (resultSet.next()) {
                 long id = resultSet.getLong("id");
-                long customerId = resultSet.getLong("customer_id");
+                int customerId = resultSet.getInt("customer_id");
                 long menuId = resultSet.getLong("menu_id");
                 long deliveryExecutiveId = resultSet.getLong("delivery_executive_id");
                 Timestamp timestamp = resultSet.getTimestamp("timestamp");
@@ -130,6 +132,37 @@ public class OrderRepository {
     }
 
     public Order findById(long id) {
-        return null;
+        Order order = null;
+        String query = "SELECT * FROM orders WHERE id = ?";
+        try {
+            this.initConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                int customerId = resultSet.getInt("customer_id");
+                long menuId = resultSet.getLong("menu_id");
+                long deliveryExecutiveId = resultSet.getLong("delivery_executive_id");
+                Timestamp timestamp = resultSet.getTimestamp("timestamp");
+
+                Customer customer = new CustomerRepository().findById(customerId);
+                Menu menu = new MenuRepository().findById(menuId);
+                DeliveryExecutive deliveryExecutive = new DeliveryExecutiveRepository().findById(deliveryExecutiveId);
+
+                order = new Order(id, customer, menu, deliveryExecutive, timestamp.toLocalDateTime());
+            }
+        } catch (SQLException e) {
+            logger.error("SQL error: {}", e.getMessage(), e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.error("Error closing connection: {}", e.getMessage(), e);
+                }
+            }
+        }
+        return order;
     }
 }
